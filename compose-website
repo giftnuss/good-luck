@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -x
+set -e
+
+if [ -z "$1" ] ; then
+  echo -n "project name? "
+  read name
+else
+  name=$1
+fi
+
+mkdir $name
+cd $name
+
+curl -sS https://getcomposer.org/installer | php
+
+./composer.phar require "fxp/composer-asset-plugin:~1.0"
+ 
+git init
+
+echo "*~" >.gitignore
+echo "vendor/" >>.gitignore
+echo "composer.lock" >> .gitignore 
+echo "composer.phar" >> .gitignore 
+
+git add composer.json
+git add .gitignore
+
