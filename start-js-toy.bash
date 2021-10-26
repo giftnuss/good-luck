@@ -32,8 +32,9 @@
      if [ "$FRESH" == TRUE ] ; then
           mkdir -p $PROJECT
           cd $PROJECT
-
-          npm init -y
+          [ -d .git ] || git init
+          [ -f package.json ] || npm init -y
+          echo "Good Luck!" >_body.html
      fi
 
 ##### The Dependencies with which I like to play:
@@ -95,51 +96,51 @@
 ##### Note the - sign before __END__. This makes indentation in a multiline string possible.
 ##### This is also something, what should not run in a unsecure environment, because of unchecked shell input.
     GEN_INDEX_HTML=$(cat <<-__END__
-
-    const js="$JS".split(/\s+/);
-    const css="$CSS".split(/\s+/);
-    __END__
+	
+	const js="$JS".split(/\s+/);
+	const css="$CSS".split(/\s+/);
+	__END__
     )
 
 ##### The HTML generating script is only splitted into chunks for blogging purpose.
 ##### This chunk imports diffhtml.
     GEN_INDEX_HTML="$GEN_INDEX_HTML"$(cat <<-__END__
-    const diffhtml = require( "diffhtml" );
-    const h = diffhtml.createTree;
-    const toString = diffhtml.toString;
-    __END__
+	const diffhtml = require( "diffhtml" );
+	const h = diffhtml.createTree;
+	const toString = diffhtml.toString;
+	__END__
     )
 
 ##### Setup the document strucure and load the assets.
     GEN_INDEX_HTML="$GEN_INDEX_HTML"$(cat <<-__END__
-    console.log("<!DOCTYPE html>");
-
-    let head = h('head', null, [
-         h('title', null, ["Fresh project $PROJECT -- Good luck!"]),
-         h('meta', {charset: "utf-8"}),
-         h('meta', {name: "viewport", content: "width=device-width, initial-scale=1"}),
-         css.map(f => h('link', {rel: "stylesheet", href: ["./css/",f].join("")})),
-         js.map(f => h('script', {src: ["./js/",f].join("")}))
-    ]);
-    let body = h('body');
-    let html = h('html', null, [head,body]);
-    __END__
+	console.log("<!DOCTYPE html>");
+	
+	let head = h('head', null, [
+	    h('title', null, ["Fresh project $PROJECT -- Good luck!"]),
+	    h('meta', {charset: "utf-8"}),
+	    h('meta', {name: "viewport", content: "width=device-width, initial-scale=1"}),
+	    css.map(f => h('link', {rel: "stylesheet", href: ["./css/",f].join("")})),
+	    js.map(f => h('script', {src: ["./js/",f].join("")}))
+	]);
+	let body = h('body');
+	let html = h('html', null, [head,body]);
+	__END__
     )
 
 ##### Load the page content from a separate file _body.html and inject it into the document.
 ##### Finally make a string from the structure and send them to stdout.
     GEN_INDEX_HTML="$GEN_INDEX_HTML"$(cat <<-__END__
-    let fs = require('fs');
-    try {
-        let bodyhtml = fs.readFileSync( "./_body.html", "utf8");
-        diffhtml.innerHTML(body, bodyhtml);
-    }
-    catch (err) {
-        console.warn("Can not load _body.html");
-        console.error(err);
-    }
-    console.log( toString(html) );
-    __END__
+	let fs = require('fs');
+	try {
+	    let bodyhtml = fs.readFileSync( "./_body.html", "utf8");
+	    diffhtml.innerHTML(body, bodyhtml);
+	}
+	catch (err) {
+	    console.warn("Can not load _body.html");
+	    console.error(err);
+	}
+	console.log( toString(html) );
+	__END__
     )
 
 
